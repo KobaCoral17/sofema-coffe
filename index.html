@@ -1,23 +1,55 @@
+<!--LOGIN/ INISIO DE SESION-->
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <title>Home</title>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <!--
-      Need a visual blank slate?
-      Remove all code in `styles.css`!
-    -->
-    <link rel="stylesheet" href="styles.css" />
-    <script type="module" src="script.js"></script>
-  </head>
-  <body>
-    <nav>
-      <a href="/" aria-current="page">Home</a>
-      <a href="/page2.html">Other page</a>
-    </nav>
-    <main>
-      <h1>Home page</h1>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SOFEMA Cafetería - Iniciar Sesión</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script type="module" src="login.js" defer></script>
+</head>
+<body class="login-body">
+  <div class="login-container">
+    <header class="login-header">
+      <a href="page2.html" class="btn-top-register">Registrar empleado</a>
+    </header>
+
+    <main class="login-main">
+      <div class="brand-section">
+        <div class="brand-logo">
+          <span class="logo-letter">S</span>
+        </div>
+        <h1 class="brand-title">SOFEMA</h1>
+        <p class="brand-subtitle">CAFETERÍA</p>
+      </div>
+
+      <form id="loginForm" class="login-form">
+        <div class="form-group dropdown-container">
+          <div class="select-box" id="roleSelectBtn">
+            <span id="roleLabel">Rol</span>
+            <span class="arrow">v</span>
+          </div>
+          <div class="dropdown-options" id="roleDropdown" style="display: none;">
+            <div class="option-item" data-value="Administrador">Administrador</div>
+            <div class="option-item" data-value="Empleado">Empleado</div>
+          </div>
+          <input type="hidden" id="selectedRole" required />
+        </div>
+
+        <div class="form-group">
+          <input type="email" id="loginEmail" placeholder="Correo Electronico" required />
+        </div>
+
+        <div class="form-group">
+          <input type="password" id="loginPassword" placeholder="Contraseña" required />
+          <a href="#" id="forgotPassword" class="forgot-link">¿Olvido su contraseña?</a>
+        </div>
+
+        <div class="form-actions-right">
+          <button type="submit" class="btn-ingress">Ingresar</button>
+        </div>
+      </form>
     </main>
-  </body>
+  </div>
+</body>
 </html>
