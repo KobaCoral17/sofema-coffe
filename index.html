@@ -1,55 +1,236 @@
-<!--LOGIN/ INISIO DE SESION-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SOFEMA Cafetería - Iniciar Sesión</title>
+  <title>SOFEMA COFFE - Sistema de Gestión</title>
   <link rel="stylesheet" href="styles.css" />
-  <script type="module" src="login.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js" defer></script>
 </head>
-<body class="login-body">
-  <div class="login-container">
-    <header class="login-header">
-      <a href="page2.html" class="btn-top-register">Registrar empleado</a>
-    </header>
+<body>
 
-    <main class="login-main">
-      <div class="brand-section">
-        <div class="brand-logo">
-          <span class="logo-letter">S</span>
-        </div>
-        <h1 class="brand-title">SOFEMA</h1>
-        <p class="brand-subtitle">CAFETERÍA</p>
-      </div>
-
-      <form id="loginForm" class="login-form">
-        <div class="form-group dropdown-container">
-          <div class="select-box" id="roleSelectBtn">
-            <span id="roleLabel">Rol</span>
-            <span class="arrow">v</span>
-          </div>
-          <div class="dropdown-options" id="roleDropdown" style="display: none;">
-            <div class="option-item" data-value="Administrador">Administrador</div>
-            <div class="option-item" data-value="Empleado">Empleado</div>
-          </div>
-          <input type="hidden" id="selectedRole" required />
-        </div>
-
+  <!-- VISTA: LOGIN -->
+  <div id="view-login" class="auth-wrapper">
+    <div class="auth-card">
+      <div class="logo">☕ SOFEMA COFFE</div>
+      <p>Cafetería & Rosticería</p>
+      
+      <form id="form-login">
         <div class="form-group">
-          <input type="email" id="loginEmail" placeholder="Correo Electronico" required />
+          <label>Rol de Usuario</label>
+          <select id="login-role" class="form-control" required>
+            <option value="">Selecciona un rol...</option>
+            <option value="Administrador">Administrador</option>
+            <option value="Empleado">Empleado</option>
+          </select>
         </div>
-
         <div class="form-group">
-          <input type="password" id="loginPassword" placeholder="Contraseña" required />
-          <a href="#" id="forgotPassword" class="forgot-link">¿Olvido su contraseña?</a>
+          <label>Correo Electrónico</label>
+          <input type="email" id="login-email" class="form-control" placeholder="usuario@sofema.com" required />
         </div>
-
-        <div class="form-actions-right">
-          <button type="submit" class="btn-ingress">Ingresar</button>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" id="login-password" class="form-control" placeholder="••••••••" required />
         </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Ingresar al Sistema</button>
       </form>
+    </div>
+  </div>
+
+  <!-- VISTA: SISTEMA PRINCIPAL -->
+  <div id="app-container" style="display: none;">
+    <!-- NAV LATERAL -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>☕ SOFEMA</h2>
+        <small id="display-user-role" style="color: var(--accent);"></small>
+      </div>
+      <ul class="sidebar-menu">
+        <li class="nav-item active" data-view="sales"><a href="#">🛒 Punto de Venta</a></li>
+        <li class="nav-item" data-view="inventory"><a href="#">📦 Inventario</a></li>
+        <li class="nav-item" data-view="customers"><a href="#">👥👏 Clientes</a></li>
+        <li class="nav-item admin-only" data-view="employees"><a href="#">👔 Empleados</a></li>
+        <li class="nav-item admin-only" data-view="stats"><a href="#">📊 Estadísticas</a></li>
+      </ul>
+      <div class="user-panel">
+        <div id="display-user-name" style="font-weight: 600;">Usuario</div>
+        <button id="btn-logout" class="btn btn-danger" style="margin-top: 10px; width: 100%; padding: 0.4rem;">Cerrar Sesión</button>
+      </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+      <header class="top-bar">
+        <h3 id="page-title">Punto de Venta</h3>
+        <small id="connection-status" style="color: green;">● Modo Local Activo</small>
+      </header>
+
+      <div class="content-body">
+        
+        <!-- SECCIÓN 1: POS / VENTAS -->
+        <section id="sec-sales" class="view-section active">
+          <div class="pos-container">
+            <div>
+              <h4>Menú de Productos</h4>
+              <br>
+              <div id="pos-products" class="product-grid"></div>
+            </div>
+            
+            <div class="card" style="display: flex; flex-direction: column;">
+              <h4>Orden Actual</h4>
+              <br>
+              <div class="form-group">
+                <label>Alias del Cliente</label>
+                <select id="pos-customer" class="form-control">
+                  <option value="">Selecciona un cliente...</option>
+                </select>
+              </div>
+
+              <div id="pos-cart-items" style="flex: 1; overflow-y: auto; margin-bottom: 1rem;">
+                <p style="color: var(--text-muted); text-align: center;">Carrito vacío</p>
+              </div>
+
+              <div style="border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem;">
+                  <span>Total:</span>
+                  <span id="pos-total">$0.00</span>
+                </div>
+                <button id="btn-complete-sale" class="btn btn-primary" style="width: 100%;">Registrar Venta</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECCIÓN 2: INVENTARIO -->
+        <section id="sec-inventory" class="view-section">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3>Gestión de Inventario</h3>
+            <button id="btn-open-inv-modal" class="btn btn-primary admin-only">+ Nuevo Producto</button>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Producto</th>
+                  <th>Categoría</th>
+                  <th>Precio</th>
+                  <th>Stock</th>
+                </tr>
+              </thead>
+              <tbody id="tbl-inventory"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- SECCIÓN 3: CLIENTES -->
+        <section id="sec-customers" class="view-section">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3>Registro de Clientes</h3>
+            <form id="form-customer" style="display: flex; gap: 10px;">
+              <input type="text" id="cust-alias" placeholder="Alias (Ej. Chema)" class="form-control" required />
+              <input type="text" id="cust-name" placeholder="Nombre completo" class="form-control" required />
+              <input type="text" id="cust-phone" placeholder="Teléfono" class="form-control" />
+              <button type="submit" class="btn btn-primary">Registrar</button>
+            </form>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Alias</th>
+                  <th>Nombre</th>
+                  <th>Teléfono</th>
+                  <th>Puntos</th>
+                </tr>
+              </thead>
+              <tbody id="tbl-customers"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- SECCIÓN 4: EMPLEADOS (ADMIN) -->
+        <section id="sec-employees" class="view-section">
+          <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem;">
+            <div class="card">
+              <h4>Registrar Nuevo Empleado</h4>
+              <br>
+              <form id="form-employee">
+                <div class="form-group">
+                  <label>ID Generado</label>
+                  <input type="text" id="emp-id" class="form-control" readonly />
+                </div>
+                <div class="form-group">
+                  <label>Nombre Completo</label>
+                  <input type="text" id="emp-name" class="form-control" required />
+                </div>
+                <div class="form-group">
+                  <label>Correo Electrónico</label>
+                  <input type="email" id="emp-email" class="form-control" required />
+                </div>
+                <div class="form-group">
+                  <label>Teléfono</label>
+                  <input type="text" id="emp-phone" class="form-control" required />
+                </div>
+                <div class="form-group">
+                  <label>Contraseña</label>
+                  <input type="password" id="emp-pass" class="form-control" required />
+                </div>
+                <div class="form-group">
+                  <label>Rol</label>
+                  <select id="emp-role" class="form-control" required>
+                    <option value="Empleado">Empleado</option>
+                    <option value="Administrador">Administrador</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Guardar Empleado</button>
+              </form>
+            </div>
+            
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Correo</th>
+                    <th>Rol</th>
+                  </tr>
+                </thead>
+                <tbody id="tbl-employees"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECCIÓN 5: ESTADÍSTICAS (ADMIN) -->
+        <section id="sec-stats" class="view-section">
+          <div class="grid-cards">
+            <div class="card stat-card">
+              <div>
+                <small>Ventas Totales</small>
+                <div id="stat-total-sales" class="stat-number">$0.00</div>
+              </div>
+            </div>
+            <div class="card stat-card">
+              <div>
+                <small>Transacciones</small>
+                <div id="stat-count-sales" class="stat-number">0</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <h4>Histórico de Ventas</h4>
+            <br>
+            <canvas id="chartSales" height="100"></canvas>
+          </div>
+        </section>
+
+      </div>
     </main>
   </div>
+
 </body>
 </html>
