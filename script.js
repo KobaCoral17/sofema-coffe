@@ -23,11 +23,8 @@ let localDB = {
     { id: 1, producto: 'Espresso Doble', categoria: 'Bebidas Calientes', precio: 45.00, stock: 150 },
     { id: 2, producto: 'Cappuccino Tradicional', categoria: 'Bebidas Calientes', precio: 55.00, stock: 120 },
     { id: 3, producto: 'Latte Vainilla', categoria: 'Bebidas Calientes', precio: 60.00, stock: 100 },
-    { id: 4, producto: 'Café Americano', categoria: 'Bebidas Calientes', precio: 40.00, stock: 200 },
-    { id: 5, producto: 'Frappé de Caramelo', categoria: 'Bebidas Frías', precio: 65.00, stock: 90 },
-    { id: 6, producto: 'Iced Vanilla Latte', categoria: 'Bebidas Frías', precio: 60.00, stock: 110 },
-    { id: 7, producto: 'Croissant de Mantequilla', categoria: 'Repostería', precio: 40.00, stock: 45 },
-    { id: 8, producto: 'Panini de Jamón Serrano', categoria: 'Alimentos', precio: 95.00, stock: 25 }
+    { id: 4, producto: 'Croissant de Mantequilla', categoria: 'Repostería', precio: 40.00, stock: 45 },
+    { id: 5, producto: 'Panini de Jamón Serrano', categoria: 'Alimentos', precio: 95.00, stock: 25 }
   ],
   sales: [
     { cliente_alias: 'CaféAdicto', vendedor_nombre: 'Sofía Ramírez', total: 90.00, created_at: new Date().toISOString() },
@@ -35,73 +32,9 @@ let localDB = {
   ]
 };
 
-// ESTRUCTURA DEL SISTEMA EXPERTO (ÁRBOL DE DECISIÓN)
-const ARBOL_TEST = {
-  id: 'q1', nivel: 1,
-  pregunta: '1. ¿Cómo describirías tu ritmo natural en el día a día?',
-  opcionA: { texto: 'A) Intenso, activo y en movimiento constante.', resumen: 'Intenso & Activo', siguiente: 'q2_A' },
-  opcionB: { texto: 'B) Pausado, enfocado y constante.', resumen: 'Pausado & Enfocado', siguiente: 'q2_B' },
-  ramas: {
-    q2_A: {
-      id: 'q2_A', nivel: 2,
-      pregunta: '2. En tus decisiones y relaciones personales, tú:',
-      opcionA: { texto: 'A) Voy directo al punto y priorizo efectividad.', resumen: 'Directo & Pragmático', siguiente: 'q3_AA' },
-      opcionB: { texto: 'B) Busco la armonía y cuido el ambiente.', resumen: 'Armónico & Social', siguiente: 'q3_AB' },
-      ramas: {
-        q3_AA: {
-          id: 'q3_AA', nivel: 3,
-          pregunta: '3. Ante un cambio o reto imprevisto:',
-          opcionA: { texto: 'A) Me motiva la adrenalina y el liderazgo.', resumen: 'Adrenalina', resultado: 'ESPRESSO' },
-          opcionB: { texto: 'B) Improviso una solución funcional.', resumen: 'Improvisación', resultado: 'AMERICANO' }
-        },
-        q3_AB: {
-          id: 'q3_AB', nivel: 3,
-          pregunta: '3. Ante un cambio o reto imprevisto:',
-          opcionA: { texto: 'A) Propongo algo alegre y divertido.', resumen: 'Alegre', resultado: 'FRAPPE' },
-          opcionB: { texto: 'B) Mantengo la calma con soltura.', resumen: 'Calma fresca', resultado: 'ICED_LATTE' }
-        }
-      }
-    },
-    q2_B: {
-      id: 'q2_B', nivel: 2,
-      pregunta: '2. En tus relaciones personales y de trabajo te defines como:',
-      opcionA: { texto: 'A) Cálido, empático y acogedor.', resumen: 'Cálido & Empático', siguiente: 'q3_BA' },
-      opcionB: { texto: 'B) Reservado, analítico y observador.', resumen: 'Analítico & Observador', siguiente: 'q3_BB' },
-      ramas: {
-        q3_BA: {
-          id: 'q3_BA', nivel: 3,
-          pregunta: '3. En tus momentos de descanso prefieres:',
-          opcionA: { texto: 'A) Una charla cálida con espuma abundante.', resumen: 'Charla cálida', resultado: 'CAPUCHINO' },
-          opcionB: { texto: 'B) Momentos suaves y tranquilos.', resumen: 'Momento suave', resultado: 'LATTE' }
-        },
-        q3_BB: {
-          id: 'q3_BB', nivel: 3,
-          pregunta: '3. ¿Qué valoras más al trabajar o crear?',
-          opcionA: { texto: 'A) La precisión del ritual y el detalle.', resumen: 'Detalle artesanal', resultado: 'AMERICANO' },
-          opcionB: { texto: 'B) La extracción limpia e independiente.', resumen: 'Sabor independiente', resultado: 'ESPRESSO' }
-        }
-      }
-    }
-  }
-};
-
-const CATALAGO_CAFES = {
-  ESPRESSO: { productoNombre: 'Espresso Doble', nombre: 'Espresso Doble ⚡', tagline: 'Energía pura, carácter directo y determinación.', notas: 'Amargo pronunciado, cuerpo denso y crema persistente.', psicologia: 'Alta Extraversión y Pragmatismo. Liderazgo directo sin rodeos.' },
-  AMERICANO: { productoNombre: 'Café Americano', nombre: 'Café Americano ☕', tagline: 'Equilibrio, pragmatismo clásico y funcionalidad.', notas: 'Cuerpo ligero, sabor limpio a grano tostado.', psicologia: 'Responsabilidad y Estabilidad. Confiable y directo.' },
-  FRAPPE: { productoNombre: 'Frappé de Caramelo', nombre: 'Frappé de Caramelo 🍧', tagline: 'Alegría, jovialidad y espíritu festivo.', notas: 'Granizado helado, dulce con toppings y crema batida.', psicologia: 'Extraversión Alta y optimismo. Celebras el presente.' },
-  ICED_LATTE: { productoNombre: 'Iced Vanilla Latte', nombre: 'Iced Vanilla Latte 🧊', tagline: 'Frescura, versatilidad y soltura relajada.', notas: 'Leche fría sedosa, hielo y vainilla ligera.', psicologia: 'Amabilidad y Adaptabilidad. Fluyes con tranquilidad.' },
-  CAPUCHINO: { productoNombre: 'Cappuccino Tradicional', nombre: 'Cappuccino Tradicional 🎨', tagline: 'Calidez, empatía y confort reconfortante.', notas: 'Abundante espuma cremosa vaporizada.', psicologia: 'Alta Amabilidad. Creas ambientes acogedores.' },
-  LATTE: { productoNombre: 'Latte Vainilla', nombre: 'Latte Vainilla 🥛', tagline: 'Suavidad, equilibrio y estilo sereno.', notas: 'Predominancia de leche vaporizada y espresso suave.', psicologia: 'Personalidad pacífica y diplomática.' }
-};
-
 let currentUser = null;
 let currentCart = [];
 let salesChart = null;
-
-// ESTADO DEL SISTEMA EXPERTO
-let nodoActualTest = ARBOL_TEST;
-let historialTest = [];
-let ultimoResultadoCafe = null;
 
 // INICIALIZACIÓN
 document.addEventListener('DOMContentLoaded', () => {
@@ -115,9 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('connection-status').textContent = '● Modo Simulación Local';
     document.getElementById('connection-status').style.color = '#d4a373';
   }
-
-  // Inicializar el test experto
-  renderizarPreguntaTest();
 });
 
 // NAVEGACIÓN Y VISTAS
@@ -145,7 +75,7 @@ function setupNavigation() {
   });
 }
 
-// FORMULARIOS Y LÓGICA
+// FORMULARIOS Y LOGICA
 function setupForms() {
   // Login
   document.getElementById('form-login').addEventListener('submit', async (e) => {
@@ -157,12 +87,12 @@ function setupForms() {
     let user = null;
 
     if (dbClient) {
-      const { data } = await dbClient
-        .from('employees')
-        .select('*')
-        .eq('correo', email)
-        .eq('password', pass)
-        .single();
+      const { data, error } = await dbClient
+      .from('employees')
+      .select('*')
+      .eq('correo', email)
+      .eq('password', pass)
+      .single(); // <--- Si no existe el usuario o la consulta falla, Supabase devuelve HTTP 406
       user = data;
     } else {
       user = localDB.employees.find(e => e.correo === email && e.password === pass && e.rol === role);
@@ -246,9 +176,6 @@ function setupForms() {
     renderCart();
     loadInventory();
   });
-
-  // Botón: Pedir el café recomendado por el Sistema Experto
-  document.getElementById('btn-order-recommended').addEventListener('click', pedirCafeRecomendado);
 }
 
 // CARGA INICIAL TRAS LOGIN
@@ -273,111 +200,7 @@ function initApp() {
   if (currentUser.rol === 'Administrador') loadEmployees();
 }
 
-// LÓGICA DEL SISTEMA EXPERTO (TEST)
-function renderizarPreguntaTest() {
-  document.getElementById('level-badge').innerText = `Nivel ${nodoActualTest.nivel} de 3`;
-  document.getElementById('question-text').innerText = nodoActualTest.pregunta;
-
-  const container = document.getElementById('options-container');
-  container.innerHTML = `
-    <button class="btn btn-secondary" style="text-align: left; padding: 0.8rem;" onclick="responderTest('A')">
-      ${nodoActualTest.opcionA.texto}
-    </button>
-    <button class="btn btn-secondary" style="text-align: left; padding: 0.8rem;" onclick="responderTest('B')">
-      ${nodoActualTest.opcionB.texto}
-    </button>
-  `;
-
-  renderizarArbolTest();
-}
-
-function responderTest(opcion) {
-  const infoOpcion = opcion === 'A' ? nodoActualTest.opcionA : nodoActualTest.opcionB;
-  historialTest.push({ nivel: nodoActualTest.nivel, opcion, resumen: infoOpcion.resumen });
-
-  if (infoOpcion.resultado) {
-    ultimoResultadoCafe = CATALAGO_CAFES[infoOpcion.resultado];
-    mostrarResultadoTest(ultimoResultadoCafe);
-  } else if (infoOpcion.siguiente && nodoActualTest.ramas[infoOpcion.siguiente]) {
-    nodoActualTest = nodoActualTest.ramas[infoOpcion.siguiente];
-    renderizarPreguntaTest();
-  }
-}
-
-function mostrarResultadoTest(cafe) {
-  document.getElementById('quiz-view').style.display = 'none';
-  document.getElementById('result-view').style.display = 'block';
-
-  document.getElementById('coffee-name').innerText = cafe.nombre;
-  document.getElementById('coffee-tagline').innerText = `"${cafe.tagline}"`;
-  document.getElementById('coffee-notes').innerText = cafe.notas;
-  document.getElementById('coffee-psych').innerText = cafe.psicologia;
-
-  renderizarArbolTest();
-}
-
-function renderizarArbolTest() {
-  const container = document.getElementById('tree-display');
-  const estructura = [
-    { nivel: 1, titulo: 'NIVEL 1: Ritmo y Energía', opA: 'A) Intenso & Activo', opB: 'B) Pausado & Enfocado' },
-    { nivel: 2, titulo: 'NIVEL 2: Relaciones & Decisiones', opA: 'A) Directo / Pragmático', opB: 'B) Cálido / Empático' },
-    { nivel: 3, titulo: 'NIVEL 3: Tolerancia al Riesgo / Estilo', opA: 'A) Adrenalina / Arte', opB: 'B) Funcional / Calma' }
-  ];
-
-  container.innerHTML = estructura.map(n => {
-    const paso = historialTest.find(h => h.nivel === n.nivel);
-    return `
-      <div class="tree-node-item">
-        <div class="tree-node-title">${n.titulo}</div>
-        <div class="tree-branches-grid">
-          <div class="branch-box ${paso && paso.opcion === 'A' ? 'active' : ''}">${n.opA}</div>
-          <div class="branch-box ${paso && paso.opcion === 'B' ? 'active' : ''}">${n.opB}</div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function reiniciarTest() {
-  nodoActualTest = ARBOL_TEST;
-  historialTest = [];
-  ultimoResultadoCafe = null;
-  document.getElementById('result-view').style.display = 'none';
-  document.getElementById('quiz-view').style.display = 'block';
-  renderizarPreguntaTest();
-}
-
-// FUNCIÓN PARA AÑADIR LA BEBIDA RECOMENDADA AL CARRITO DE VENTAS
-async function pedirCafeRecomendado() {
-  if (!ultimoResultadoCafe) return;
-
-  const nombreProducto = ultimoResultadoCafe.productoNombre;
-  
-  // Buscar el producto en la lista de inventario
-  let inv = dbClient ? (await dbClient.from('inventory').select('*')).data : localDB.inventory;
-  const prod = inv.find(i => i.producto.toLowerCase() === nombreProducto.toLowerCase());
-
-  if (prod) {
-    addToCart(prod.producto, prod.precio);
-  } else {
-    // Si no está exactamente nombrado en inventario, se agrega con un precio estándar de $50.00
-    addToCart(nombreProducto, 50.00);
-  }
-
-  // Redirigir la vista al Punto de Venta (Sales)
-  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-  document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-
-  const navSales = document.querySelector('.nav-item[data-view="sales"]');
-  if (navSales) navSales.classList.add('active');
-  
-  document.getElementById('sec-sales').classList.add('active');
-  document.getElementById('page-title').textContent = 'Punto de Venta';
-
-  alert(`¡${nombreProducto} agregado exitosamente a la orden actual!`);
-}
-
-// MÓDULOS DE DATOS DEL POS
+// MÓDULOS DE DATOS
 async function loadPOS() {
   let inv = dbClient ? (await dbClient.from('inventory').select('*')).data : localDB.inventory;
   let cust = dbClient ? (await dbClient.from('customers').select('*')).data : localDB.customers;
