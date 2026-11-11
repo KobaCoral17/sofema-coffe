@@ -296,3 +296,41 @@ tr:hover {
 .view-section.active {
   display: block;
 }
+
+/* Estilos para la interfaz del Sistema Experto */
+.tree-node-item {
+  background: var(--bg-light);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 0.6rem;
+}
+
+.tree-node-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 0.4rem;
+}
+
+.tree-branches-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.branch-box {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.branch-box.active {
+  background: var(--primary);
+  color: #ffffff;
+  font-weight: 700;
+  border-color: var(--primary);
+}
