@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SOFEMA COFFE - Sistema de Gestión</title>
+  <title>SOFEMA COFFE - Sistema de Gestión & Sistema Experto</title>
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -14,10 +14,8 @@
   <!-- VISTA: LOGIN -->
   <div id="view-login" class="auth-wrapper">
     <div class="auth-card">
-      <h1 class="brand-title">
-        <img src="SOFEMAMINI.png" alt="SOFEMA COFFE" class="brand-logo-img">
-      </h1>
-      <p>Cafetería</p>
+      <div class="logo">☕ SOFEMA COFFE</div>
+      <p>Cafetería & Rosticería</p>
       
       <form id="form-login">
         <div class="form-group">
@@ -46,11 +44,12 @@
     <!-- NAV LATERAL -->
     <aside class="sidebar">
       <div class="sidebar-header">
-        <h2>  <img src="SOFEMAMINI.png" alt="SOFEMA COFFE" class="brand-logo-img"> SOFEMA</h2>
+        <h2>☕ SOFEMA</h2>
         <small id="display-user-role" style="color: var(--accent);"></small>
       </div>
       <ul class="sidebar-menu">
         <li class="nav-item active" data-view="sales"><a href="#">🛒 Punto de Venta</a></li>
+        <li class="nav-item" data-view="expert-test"><a href="#">🧠 Test: ¿Qué café eres?</a></li>
         <li class="nav-item" data-view="inventory"><a href="#">📦 Inventario</a></li>
         <li class="nav-item" data-view="customers"><a href="#">👥 Clientes</a></li>
         <li class="nav-item admin-only" data-view="employees"><a href="#">👔 Empleados</a></li>
@@ -105,16 +104,62 @@
           </div>
         </section>
 
+        <!-- SECCIÓN NUEVA: SISTEMA EXPERTO TEST & PEDIDO -->
+        <section id="sec-expert-test" class="view-section">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            
+            <!-- TARJETA DEL TEST -->
+            <div class="card">
+              <div id="quiz-view">
+                <span class="badge badge-emp" id="level-badge">Nivel 1 de 3</span>
+                <h3 id="question-text" style="margin-top: 1rem; margin-bottom: 1.5rem;">Cargando pregunta...</h3>
+                
+                <div id="options-container" style="display: flex; flex-direction: column; gap: 10px;">
+                  <!-- Botones de preguntas generados dinámicamente -->
+                </div>
+              </div>
+
+              <!-- TARJETA DE RESULTADO FINAL Y ORDEN -->
+              <div id="result-view" style="display: none; text-align: center;">
+                <span class="badge badge-admin">✨ Tu Café Recomendado</span>
+                <h2 id="coffee-name" style="color: var(--primary); font-size: 1.8rem; margin: 1rem 0 0.5rem 0;"></h2>
+                <p id="coffee-tagline" style="color: var(--text-muted); font-style: italic; margin-bottom: 1.5rem;"></p>
+                
+                <div style="background: var(--bg-light); padding: 1rem; border-radius: 8px; text-align: left; margin-bottom: 1rem; border: 1px solid var(--border-color);">
+                  <strong style="color: var(--primary);">☕ Notas de Cata:</strong>
+                  <p id="coffee-notes" style="font-size: 0.9rem; margin-top: 0.3rem;"></p>
+                </div>
+
+                <div style="background: var(--bg-light); padding: 1rem; border-radius: 8px; text-align: left; margin-bottom: 1.5rem; border: 1px solid var(--border-color);">
+                  <strong style="color: var(--primary);">🧠 Perfil Psicológico:</strong>
+                  <p id="coffee-psych" style="font-size: 0.9rem; margin-top: 0.3rem;"></p>
+                </div>
+
+                <!-- BOTÓN PRINCIPAL DE PEDIDO RÁPIDO AL POS -->
+                <button id="btn-order-recommended" class="btn btn-primary" style="width: 100%; justify-content: center; font-size: 1rem; padding: 0.8rem; margin-bottom: 0.5rem;">
+                  🛒 Pedir este Café en el POS
+                </button>
+                <button onclick="reiniciarTest()" class="btn btn-secondary" style="width: 100%; justify-content: center;">
+                  🔄 Repetir Test
+                </button>
+              </div>
+            </div>
+
+            <!-- ARBOL EN TIEMPO REAL -->
+            <div class="card">
+              <h4>🌳 Árbol de Decisión en Tiempo Real</h4>
+              <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Ruta recorrida según tus respuestas:</p>
+              <div id="tree-display"></div>
+            </div>
+
+          </div>
+        </section>
+
         <!-- SECCIÓN 2: INVENTARIO -->
         <section id="sec-inventory" class="view-section">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
             <h3>Gestión de Inventario</h3>
-            <form id="form-producto" style="display: flex; gap: 10px;">
-            <input type="text" id= "prod-Nombre" placeholder="Nombre de Producto" class="form-control" required />
-              <input type="text" id="prod-Precio"placeholder="precio Producto" class="form-control" required />
-              <input type="text" id="prod-categoria" placeholder="tipo de Producto" class="form-control" required />
-              <input type="text" id="prod-stock" placeholder="cantidad" class="form-control" />
-            <button type="submit" id="btn-open-inv-modal" class="btn btn-primary admin-only">+ Nuevo Producto</button>
+            <button id="btn-open-inv-modal" class="btn btn-primary admin-only">+ Nuevo Producto</button>
           </div>
           <div class="table-responsive">
             <table>
