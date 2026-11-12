@@ -249,6 +249,23 @@ function setupForms() {
 
   // Botón: Pedir el café recomendado por el Sistema Experto
   document.getElementById('btn-order-recommended').addEventListener('click', pedirCafeRecomendado);
+  //Cancelar Orden
+  const cancelOrderBtn = document.getElementById('btn-cancel-order');
+  if (cancelOrderBtn) {
+    cancelOrderBtn.addEventListener('click', () => {
+      if (confirm("¿Estás seguro de que deseas cancelar la orden actual?")) {
+        // 1. Vaciar el carrito en memoria
+        currentCart = [];
+        
+        // 2. Volver a renderizar el carrito (lo pone en "Carrito vacío" y total $0.00)
+        renderCart();
+        
+        // 3. Reiniciar el select del cliente
+        const customerSelect = document.getElementById('pos-customer');
+        if (customerSelect) customerSelect.value = "";
+      }
+    });
+  }
 }
 
 // CARGA INICIAL TRAS LOGIN

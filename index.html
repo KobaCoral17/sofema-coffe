@@ -15,7 +15,7 @@
   <div id="view-login" class="auth-wrapper">
     <div class="auth-card">
       <div class="logo">☕ SOFEMA COFFE</div>
-      <p>Cafetería & Rosticería</p>
+      <p>Cafetería</p>
       
       <form id="form-login">
         <div class="form-group">
@@ -98,6 +98,9 @@
                   <span>Total:</span>
                   <span id="pos-total">$0.00</span>
                 </div>
+                <button id="btn-cancel-order" class="btn" style="width: 40%; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 10px;">
+                  Cancelar Orden
+                </button>
                 <button id="btn-complete-sale" class="btn btn-primary" style="width: 100%;">Registrar Venta</button>
               </div>
             </div>
@@ -137,7 +140,7 @@
 
                 <!-- BOTÓN PRINCIPAL DE PEDIDO RÁPIDO AL POS -->
                 <button id="btn-order-recommended" class="btn btn-primary" style="width: 100%; justify-content: center; font-size: 1rem; padding: 0.8rem; margin-bottom: 0.5rem;">
-                  🛒 Pedir este Café en el POS
+                  🛒 Pedir este Café 
                 </button>
                 <button onclick="reiniciarTest()" class="btn btn-secondary" style="width: 100%; justify-content: center;">
                   🔄 Repetir Test
