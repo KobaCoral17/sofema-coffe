@@ -510,3 +510,45 @@ async function renderStats() {
     }
   });
 }
+
+// Abrir y cerrar modal de Nuevo Producto
+const invModal = document.getElementById('modal-inventory');
+document.getElementById('btn-open-inv-modal').addEventListener('click', () => {
+  invModal.style.display = 'flex';
+});
+
+document.getElementById('btn-close-inv-modal').addEventListener('click', () => {
+  invModal.style.display = 'none';
+  document.getElementById('form-inventory').reset();
+});
+
+// Guardar Nuevo Producto
+document.getElementById('form-inventory').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const newProduct = {
+    producto: document.getElementById('inv-name').value.trim(),
+    categoria: document.getElementById('inv-category').value,
+    precio: parseFloat(document.getElementById('inv-price').value),
+    stock: parseInt(document.getElementById('inv-stock').value, 10)
+  };
+
+  if (dbClient) {
+    const { error } = await dbClient.from('inventory').insert([newProduct]);
+    if (error) {
+      console.error(error);
+      return alert('Error al guardar en Supabase: ' + error.message);
+    }
+  } else {
+    newProduct.id = localDB.inventory.length + 1;
+    localDB.inventory.push(newProduct);
+  }
+
+  alert('Producto registrado exitosamente');
+  document.getElementById('form-inventory').reset();
+  invModal.style.display = 'none';
+
+  // Recargar tabla de inventario y cuadrícula del POS
+  loadInventory();
+  loadPOS();
+});

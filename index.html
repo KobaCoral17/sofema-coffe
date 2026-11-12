@@ -113,6 +113,41 @@
           </div>
         </section>
 
+
+        <!-- MODAL: NUEVO PRODUCTO -->
+        <div id="modal-inventory" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center;">
+          <div class="card" style="width: 100%; max-width: 420px; position: relative;">
+            <h4 style="margin-bottom: 1rem;">Registrar Nuevo Producto</h4>
+            <form id="form-inventory">
+              <div class="form-group">
+                <label>Nombre del Producto</label>
+                <input type="text" id="inv-name" class="form-control" placeholder="Ej. Cold Brew" required />
+              </div>
+              <div class="form-group">
+                <label>Categoría</label>
+                <select id="inv-category" class="form-control" required>
+                  <option value="Bebidas Calientes">Bebidas Calientes</option>
+                  <option value="Bebidas Frías">Bebidas Frías</option>
+                  <option value="Repostería">Repostería</option>
+                  <option value="Alimentos">Alimentos</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Precio ($)</label>
+                <input type="number" id="inv-price" class="form-control" step="0.01" min="1" placeholder="55.00" required />
+              </div>
+              <div class="form-group">
+                <label>Stock Inicial</label>
+                <input type="number" id="inv-stock" class="form-control" min="1" placeholder="50" required />
+              </div>
+              <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
+                <button type="button" id="btn-close-inv-modal" class="btn btn-secondary" style="flex: 1; justify-content: center;">Cancelar</button>
+                <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center;">Guardar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        
         <!-- SECCIÓN NUEVA: SISTEMA EXPERTO TEST & PEDIDO -->
         <section id="sec-expert-test" class="view-section">
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
