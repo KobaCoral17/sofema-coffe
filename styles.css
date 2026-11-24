@@ -336,3 +336,75 @@ tr:hover {
   font-weight: 700;
   border-color: var(--primary);
 }
+/* Estilos para la barra de busqueda de priductos*/
+.barra-busqueda {
+  width: 100%;
+  padding: 18px 35px;
+  font-size: 1.5rem;
+  font-family: 'Open Sans', sans-serif;
+  color: #5C554B;
+  background-color: #E3DBCD;
+  border: none;
+  border-radius: 50px;
+  outline: none;
+}
+
+.barra-busqueda::placeholder {
+  color: #6B6359;
+  opacity: 1;
+}
+
+.barra-busqueda:focus {
+  background-color: #DCD2C0;
+  box-shadow: 0 4px 12px rgba(154, 117, 79, 0.2);
+}
+
+.filtro-semana-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: #ffffff;
+  padding: 15px 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filtro-semana-container label {
+  font-weight: 600;
+  color: #3b2314; /* Café oscuro */
+  font-size: 15px;
+}
+
+.filtro-semana-container input[type="week"] {
+  padding: 8px 12px;
+  border: 1.5px solid #d7ccc8;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #3b2314;
+  background-color: #faf8f6;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.filtro-semana-container input[type="week"]:focus {
+  border-color: #5c3a21;
+}
+
+.btn-secundario {
+  padding: 8px 14px;
+  background-color: #5c3a21;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-secundario:hover {
+  background-color: #3b2314;
+}
+

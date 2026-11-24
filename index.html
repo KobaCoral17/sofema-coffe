@@ -205,6 +205,15 @@
             <h3>Gestión de Inventario</h3>
             <button id="btn-open-inv-modal" class="btn btn-primary admin-only">+ Nuevo Producto</button>
           </div>
+          <!-- Barra de búsqueda -->
+    <div class="buscador-contenedor">
+      <input 
+        type="text" 
+        id="inputBusqueda" 
+        class="barra-busqueda" 
+        placeholder="Buscar Producto:" 
+        autocomplete="off">
+    </div>
           <div class="table-responsive">
             <table>
               <thead>
@@ -305,7 +314,7 @@
         <section id="sec-stats" class="view-section">
           <div class="grid-cards">
             <div class="card stat-card">
-              <div>
+              <div>  
                 <small>Ventas Totales</small>
                 <div id="stat-total-sales" class="stat-number">$0.00</div>
               </div>

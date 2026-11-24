@@ -552,3 +552,15 @@ document.getElementById('form-inventory').addEventListener('submit', async (e) =
   loadInventory();
   loadPOS();
 });
+
+const inputBusqueda = document.getElementById('inputBusqueda');
+
+inputBusqueda.addEventListener('keyup', function () {
+  const filtro = inputBusqueda.value.toLowerCase().trim();;
+  const filas = document.querySelectorAll('#tbl-inventory tr');
+  
+  filas.forEach(fila => {
+    const texto = fila.textContent.toLowerCase();
+    fila.style.display = texto.includes(filtro) ? '' : 'none';
+  });
+});
