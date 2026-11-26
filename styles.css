@@ -408,3 +408,47 @@ tr:hover {
   background-color: #3b2314;
 }
 
+/* Botón Editar dentro de la tabla */
+.btn-edit {
+  background-color: #f59e0b;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-edit:hover {
+  background-color: #d97706;
+}
+
+.btn-edit:active {
+  transform: scale(0.97);
+}
+
+/* Botón Cancelar edición */
+.btn-secondary {
+  background-color: #6b7280;
+  color: #ffffff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #4b5563;
+}
+
+/* Estado visual cuando el botón principal cambia a "Actualizar" */
+.btn-update-mode {
+  background-color: #10b981 !important; /* Verde esmeralda */
+}
+
+.btn-update-mode:hover {
+  background-color: #059669 !important;
+}

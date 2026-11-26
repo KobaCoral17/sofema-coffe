@@ -175,28 +175,6 @@ function setupForms() {
       alert('Credenciales incorrectas o el rol seleccionado no coincide.');
     }
   });
-
-  // Registro de Cliente
-  document.getElementById('form-customer').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const newCust = {
-      alias: document.getElementById('cust-alias').value,
-      nombre: document.getElementById('cust-name').value,
-      telefono: document.getElementById('cust-phone').value,
-      puntos: 0
-    };
-
-    if (dbClient) {
-      await dbClient.from('customers').insert([newCust]);
-    } else {
-      localDB.customers.push(newCust);
-    }
-
-    alert('Cliente registrado exitosamente');
-    document.getElementById('form-customer').reset();
-    loadCustomers();
-  });
-
   // Registro de Empleado
   document.getElementById('form-employee').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -459,19 +437,6 @@ async function loadInventory() {
     </tr>
   `).join('');
 }
-
-async function loadCustomers() {
-  let data = dbClient ? (await dbClient.from('customers').select('*')).data : localDB.customers;
-  document.getElementById('tbl-customers').innerHTML = data.map(c => `
-    <tr>
-      <td><strong>@${c.alias}</strong></td>
-      <td>${c.nombre}</td>
-      <td>${c.telefono || 'N/A'}</td>
-      <td>${c.puntos || 0} pts</td>
-    </tr>
-  `).join('');
-}
-
 async function loadEmployees() {
   let data = dbClient ? (await dbClient.from('employees').select('*')).data : localDB.employees;
   document.getElementById('tbl-employees').innerHTML = data.map(e => `
@@ -563,4 +528,122 @@ inputBusqueda.addEventListener('keyup', function () {
     const texto = fila.textContent.toLowerCase();
     fila.style.display = texto.includes(filtro) ? '' : 'none';
   });
+});
+
+// Editar datos del cliente//
+
+let currentCustomersList = [];
+
+async function loadCustomers() {
+  let data = dbClient ? (await dbClient.from('customers').select('*')).data : localDB.customers;
+  currentCustomersList = data || [];
+
+  document.getElementById('tbl-customers').innerHTML = currentCustomersList.map((c, idx) => {
+    const key = c.id ?? c.alias ?? idx;
+    return `
+      <tr>
+        <td><strong>@${c.alias}</strong></td>
+        <td>${c.nombre}</td>
+        <td>${c.telefono || 'N/A'}</td>
+        <td>${c.puntos || 0} pts</td>
+        <td>
+          <button type="button" class="btn-edit" onclick="startEditCustomer('${encodeURIComponent(key)}')">
+            Editar
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+window.startEditCustomer = function(encodedKey) {
+  const key = decodeURIComponent(encodedKey);
+  const customer = currentCustomersList.find((c, i) => String(c.id ?? c.alias ?? i) === key);
+  if (!customer) return;
+
+  document.getElementById('cust-id').value = key;
+  document.getElementById('cust-alias').value = customer.alias || '';
+  document.getElementById('cust-name').value = customer.nombre || '';
+  document.getElementById('cust-phone').value = customer.telefono || '';
+
+  const form = document.getElementById('form-customer');
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const cancelBtn = document.getElementById('btn-cancel-edit');
+
+  if (submitBtn) submitBtn.textContent = 'Actualizar';
+  if (cancelBtn) cancelBtn.style.display = 'inline-block';
+};
+
+function resetCustomerForm() {
+  document.getElementById('form-customer').reset();
+  document.getElementById('cust-id').value = '';
+
+  const form = document.getElementById('form-customer');
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const cancelBtn = document.getElementById('btn-cancel-edit');
+
+  if (submitBtn) submitBtn.textContent = 'Registrar';
+  if (cancelBtn) cancelBtn.style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const cancelBtn = document.getElementById('btn-cancel-edit');
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', resetCustomerForm);
+  }
+
+  const formCust = document.getElementById('form-customer');
+  if (formCust) {
+    formCust.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const editKey = document.getElementById('cust-id').value;
+      const alias = document.getElementById('cust-alias').value.trim();
+      const nombre = document.getElementById('cust-name').value.trim();
+      const telefono = document.getElementById('cust-phone').value.trim();
+
+      if (editKey) {
+        if (dbClient) {
+          const target = currentCustomersList.find((c, i) => String(c.id ?? c.alias ?? i) === editKey);
+          const query = dbClient.from('customers').update({ alias, nombre, telefono });
+          const { error } = target && target.id !== undefined
+            ? await query.eq('id', target.id)
+            : await query.eq('alias', target ? target.alias : editKey);
+
+          if (error) {
+            console.error(error);
+            return alert('Error al actualizar en Supabase: ' + error.message);
+          }
+        } else {
+          const idx = localDB.customers.findIndex((c, i) => String(c.id ?? c.alias ?? i) === editKey);
+          if (idx !== -1) {
+            localDB.customers[idx] = { ...localDB.customers[idx], alias, nombre, telefono };
+          }
+        }
+
+        alert('Cliente actualizado exitosamente');
+        resetCustomerForm();
+        loadCustomers();
+        loadPOS();
+        return;
+      }
+
+      const newCust = { alias, nombre, telefono, puntos: 0 };
+
+      if (dbClient) {
+        const { error } = await dbClient.from('customers').insert([newCust]);
+        if (error) {
+          console.error(error);
+          return alert('Error al registrar en Supabase: ' + error.message);
+        }
+      } else {
+        localDB.customers.push(newCust);
+      }
+
+      alert('Cliente registrado exitosamente');
+      resetCustomerForm();
+      loadCustomers();
+      loadPOS();
+    }, true);
+  }
 });
