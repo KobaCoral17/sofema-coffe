@@ -96,6 +96,8 @@ const CATALAGO_CAFES = {
 
 let currentUser = null;
 let currentCart = [];
+let currentInventoryList = [];
+let currentCustomersList = [];
 let salesChart = null;
 
 // ESTADO DEL SISTEMA EXPERTO
@@ -107,6 +109,7 @@ let ultimoResultadoCafe = null;
 document.addEventListener('DOMContentLoaded', () => {
   setupNavigation();
   setupForms();
+  setupEditProductModal();
   
   if (dbClient) {
     document.getElementById('connection-status').textContent = '● Conectado a Supabase';
@@ -175,6 +178,7 @@ function setupForms() {
       alert('Credenciales incorrectas o el rol seleccionado no coincide.');
     }
   });
+
   // Registro de Empleado
   document.getElementById('form-employee').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -227,18 +231,14 @@ function setupForms() {
 
   // Botón: Pedir el café recomendado por el Sistema Experto
   document.getElementById('btn-order-recommended').addEventListener('click', pedirCafeRecomendado);
-  //Cancelar Orden
+
+  // Cancelar Orden
   const cancelOrderBtn = document.getElementById('btn-cancel-order');
   if (cancelOrderBtn) {
     cancelOrderBtn.addEventListener('click', () => {
       if (confirm("¿Estás seguro de que deseas cancelar la orden actual?")) {
-        // 1. Vaciar el carrito en memoria
         currentCart = [];
-        
-        // 2. Volver a renderizar el carrito (lo pone en "Carrito vacío" y total $0.00)
         renderCart();
-        
-        // 3. Reiniciar el select del cliente
         const customerSelect = document.getElementById('pos-customer');
         if (customerSelect) customerSelect.value = "";
       }
@@ -348,18 +348,15 @@ async function pedirCafeRecomendado() {
 
   const nombreProducto = ultimoResultadoCafe.productoNombre;
   
-  // Buscar el producto en la lista de inventario
   let inv = dbClient ? (await dbClient.from('inventory').select('*')).data : localDB.inventory;
   const prod = inv.find(i => i.producto.toLowerCase() === nombreProducto.toLowerCase());
 
   if (prod) {
     addToCart(prod.producto, prod.precio);
   } else {
-    // Si no está exactamente nombrado en inventario, se agrega con un precio estándar de $50.00
     addToCart(nombreProducto, 50.00);
   }
 
-  // Redirigir la vista al Punto de Venta (Sales)
   document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
   document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
 
@@ -377,16 +374,14 @@ async function loadPOS() {
   let inv = dbClient ? (await dbClient.from('inventory').select('*')).data : localDB.inventory;
   let cust = dbClient ? (await dbClient.from('customers').select('*')).data : localDB.customers;
 
-  // Render Productos
   const container = document.getElementById('pos-products');
   container.innerHTML = inv.map(p => `
     <div class="product-card" onclick="addToCart('${p.producto}', ${p.precio})">
       <div style="font-weight: 600;">${p.producto}</div>
-      <div class="product-price">$${p.precio.toFixed(2)}</div>
+      <div class="product-price">$${Number(p.precio).toFixed(2)}</div>
     </div>
   `).join('');
 
-  // Select Clientes
   const select = document.getElementById('pos-customer');
   select.innerHTML = '<option value="">Selecciona un cliente...</option>' + 
     cust.map(c => `<option value="${c.alias}">${c.alias} (${c.nombre})</option>`).join('');
@@ -425,18 +420,106 @@ function renderCart() {
   document.getElementById('pos-total').textContent = `$${total.toFixed(2)}`;
 }
 
+// INVENTARIO: CARGAR, SELECCIONAR, EDITAR Y GUARDAR
 async function loadInventory() {
   let data = dbClient ? (await dbClient.from('inventory').select('*')).data : localDB.inventory;
-  document.getElementById('tbl-inventory').innerHTML = data.map(i => `
-    <tr>
-      <td>#${i.id || 0}</td>
-      <td>${i.producto}</td>
-      <td>${i.categoria}</td>
-      <td>$${Number(i.precio).toFixed(2)}</td>
-      <td>${i.stock} un.</td>
-    </tr>
-  `).join('');
+  currentInventoryList = data || [];
+
+  document.getElementById('tbl-inventory').innerHTML = currentInventoryList.map((i, idx) => {
+    const key = i.id ?? idx;
+    return `
+      <tr>
+        <td>#${i.id || 0}</td>
+        <td>${i.producto}</td>
+        <td>${i.categoria}</td>
+        <td>$${Number(i.precio).toFixed(2)}</td>
+        <td>${i.stock} un.</td>
+        <td class="col-acciones">
+          <button type="button" class="btn-editar" onclick="abrirModalEditar('${encodeURIComponent(key)}')">
+            Editar
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
 }
+
+window.abrirModalEditar = function(encodedKey) {
+  const key = decodeURIComponent(encodedKey);
+  const prod = currentInventoryList.find((p, i) => String(p.id ?? i) === key);
+  if (!prod) return;
+
+  document.getElementById('edit-id').value = key;
+  document.getElementById('edit-nombre').value = prod.producto || '';
+  document.getElementById('edit-precio').value = prod.precio ?? '';
+  document.getElementById('edit-tipo').value = prod.categoria || '';
+
+  const errorMsg = document.getElementById('mensaje-error-edit');
+  errorMsg.style.display = 'none';
+  errorMsg.textContent = '';
+
+  document.getElementById('modalEditar').style.display = 'flex';
+};
+
+window.cerrarModalEditar = function() {
+  document.getElementById('modalEditar').style.display = 'none';
+  document.getElementById('formEditarProducto').reset();
+};
+
+function setupEditProductModal() {
+  const formEditProd = document.getElementById('formEditarProducto');
+  if (!formEditProd) return;
+
+  formEditProd.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const editKey = document.getElementById('edit-id').value;
+    const nombre = document.getElementById('edit-nombre').value.trim();
+    const precio = parseFloat(document.getElementById('edit-precio').value);
+    const tipo = document.getElementById('edit-tipo').value;
+    const errorMsg = document.getElementById('mensaje-error-edit');
+
+    // Validación de campos obligatorios
+    if (!nombre || isNaN(precio) || precio <= 0 || !tipo) {
+      errorMsg.textContent = 'Completa todos los campos obligatorios (nombre, precio mayor a 0 y tipo).';
+      errorMsg.style.display = 'block';
+      return;
+    }
+
+    const updatedFields = {
+      producto: nombre,
+      precio: precio,
+      categoria: tipo
+    };
+
+    try {
+      if (dbClient) {
+        const target = currentInventoryList.find((p, i) => String(p.id ?? i) === editKey);
+        const query = dbClient.from('inventory').update(updatedFields);
+        const { error } = (target && target.id !== undefined && target.id !== null)
+          ? await query.eq('id', target.id)
+          : await query.eq('producto', target ? target.producto : editKey);
+
+        if (error) throw error;
+      } else {
+        const idx = localDB.inventory.findIndex((p, i) => String(p.id ?? i) === editKey);
+        if (idx !== -1) {
+          localDB.inventory[idx] = { ...localDB.inventory[idx], ...updatedFields };
+        }
+      }
+
+      alert('Producto actualizado correctamente');
+      cerrarModalEditar();
+      await loadInventory();
+      await loadPOS();
+    } catch (err) {
+      console.error(err);
+      errorMsg.textContent = 'Error al guardar los cambios: ' + err.message;
+      errorMsg.style.display = 'block';
+    }
+  });
+}
+
 async function loadEmployees() {
   let data = dbClient ? (await dbClient.from('employees').select('*')).data : localDB.employees;
   document.getElementById('tbl-employees').innerHTML = data.map(e => `
@@ -513,7 +596,6 @@ document.getElementById('form-inventory').addEventListener('submit', async (e) =
   document.getElementById('form-inventory').reset();
   invModal.style.display = 'none';
 
-  // Recargar tabla de inventario y cuadrícula del POS
   loadInventory();
   loadPOS();
 });
@@ -521,7 +603,7 @@ document.getElementById('form-inventory').addEventListener('submit', async (e) =
 const inputBusqueda = document.getElementById('inputBusqueda');
 
 inputBusqueda.addEventListener('keyup', function () {
-  const filtro = inputBusqueda.value.toLowerCase().trim();;
+  const filtro = inputBusqueda.value.toLowerCase().trim();
   const filas = document.querySelectorAll('#tbl-inventory tr');
   
   filas.forEach(fila => {
@@ -530,10 +612,7 @@ inputBusqueda.addEventListener('keyup', function () {
   });
 });
 
-// Editar datos del cliente//
-
-let currentCustomersList = [];
-
+// Editar datos del cliente
 async function loadCustomers() {
   let data = dbClient ? (await dbClient.from('customers').select('*')).data : localDB.customers;
   currentCustomersList = data || [];
